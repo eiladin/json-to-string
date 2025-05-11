@@ -1,4 +1,4 @@
-name: Build Verification
+name: Build
 
 on:
   push:
@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   build:
-    name: Build Verification
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

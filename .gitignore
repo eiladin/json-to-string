@@ -4,7 +4,7 @@
 *.dll
 *.so
 *.dylib
-json-to-string
+/json-to-string
 
 # Test binary, built with `go test -c`
 *.test
