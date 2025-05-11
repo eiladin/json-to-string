@@ -16,7 +16,7 @@ builds:
       - amd64
       - arm64
     ldflags:
-      - -s -w
+      - -s -w -X main.version={{.Version}}
 
 archives:
   - format_overrides:
@@ -38,4 +38,7 @@ changelog:
       - '^test:'
       - '^ci:'
       - Merge pull request
-      - Merge branch 
+      - Merge branch
+
+# Remove 'v' prefix from the tag to ensure the version is returned without it
+version_template: '{{ trimPrefix "v" .Version }}' 
