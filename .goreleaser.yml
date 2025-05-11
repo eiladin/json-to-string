@@ -16,13 +16,13 @@ builds:
       - amd64
       - arm64
     ldflags:
-      - -s -w -X main.version={{.Version}}
+      - -s -w -X main.version={{trimPrefix "v" .Version}}
 
 archives:
   - format_overrides:
       - goos: windows
         format: zip
-    name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
+    name_template: "{{ .ProjectName }}-{{ trimPrefix \"v\" .Version }}-{{ .Os }}-{{ .Arch }}"
     files:
       - LICENSE
       - README.md
@@ -39,6 +39,4 @@ changelog:
       - '^ci:'
       - Merge pull request
       - Merge branch
-
-# Remove 'v' prefix from the tag to ensure the version is returned without it
-version_template: '{{ trimPrefix "v" .Version }}' 
+ 
