@@ -7,6 +7,9 @@ on:
   pull_request:
     branches: [ '*' ]
 
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Build Verification
@@ -14,6 +17,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -21,15 +26,15 @@ jobs:
           go-version: '1.24.x'
           check-latest: true
 
-      - name: Build for current platform
-        run: make build
+      - name: Run tests
+        run: make test
 
-      # Matrix build to verify all platforms compile
-      - name: Verify multi-platform builds
-        run: |
-          GOOS=linux GOARCH=amd64 go build -o /dev/null ./cmd/json-to-string
-          GOOS=linux GOARCH=arm64 go build -o /dev/null ./cmd/json-to-string
-          GOOS=darwin GOARCH=amd64 go build -o /dev/null ./cmd/json-to-string
-          GOOS=darwin GOARCH=arm64 go build -o /dev/null ./cmd/json-to-string
-          GOOS=windows GOARCH=amd64 go build -o /dev/null ./cmd/json-to-string
-          GOOS=windows GOARCH=arm64 go build -o /dev/null ./cmd/json-to-string 
+      - name: Run GoReleaser Snapshot
+        uses: goreleaser/goreleaser-action@v5
+        with:
+          distribution: goreleaser
+          version: latest
+          args: build --snapshot
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
