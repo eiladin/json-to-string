@@ -1,0 +1,35 @@
+name: Build Verification
+
+on:
+  push:
+    branches: [ '*' ]
+    tags-ignore: [ '*' ]  # Skip this workflow for tags as release.yml will handle it
+  pull_request:
+    branches: [ '*' ]
+
+jobs:
+  build:
+    name: Build Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.x'
+          check-latest: true
+
+      - name: Build for current platform
+        run: make build
+
+      # Matrix build to verify all platforms compile
+      - name: Verify multi-platform builds
+        run: |
+          GOOS=linux GOARCH=amd64 go build -o /dev/null ./cmd/json-to-string
+          GOOS=linux GOARCH=arm64 go build -o /dev/null ./cmd/json-to-string
+          GOOS=darwin GOARCH=amd64 go build -o /dev/null ./cmd/json-to-string
+          GOOS=darwin GOARCH=arm64 go build -o /dev/null ./cmd/json-to-string
+          GOOS=windows GOARCH=amd64 go build -o /dev/null ./cmd/json-to-string
+          GOOS=windows GOARCH=arm64 go build -o /dev/null ./cmd/json-to-string 

@@ -1,0 +1,106 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    name: Build Binaries
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.x'
+          check-latest: true
+
+      - name: Set up environment variables
+        id: vars
+        run: |
+          echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          echo "DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_OUTPUT
+
+      - name: Create dist directory
+        run: mkdir -p dist
+
+      # Build for Linux amd64
+      - name: Build for Linux amd64
+        env:
+          GOOS: linux
+          GOARCH: amd64
+          CGO_ENABLED: 0
+        run: |
+          go build -o dist/json-to-string-${{ steps.vars.outputs.VERSION }}-linux-amd64 ./cmd/json-to-string
+          cd dist && tar -czf json-to-string-${{ steps.vars.outputs.VERSION }}-linux-amd64.tar.gz json-to-string-${{ steps.vars.outputs.VERSION }}-linux-amd64
+
+      # Build for Linux arm64
+      - name: Build for Linux arm64
+        env:
+          GOOS: linux
+          GOARCH: arm64
+          CGO_ENABLED: 0
+        run: |
+          go build -o dist/json-to-string-${{ steps.vars.outputs.VERSION }}-linux-arm64 ./cmd/json-to-string
+          cd dist && tar -czf json-to-string-${{ steps.vars.outputs.VERSION }}-linux-arm64.tar.gz json-to-string-${{ steps.vars.outputs.VERSION }}-linux-arm64
+
+      # Build for macOS amd64
+      - name: Build for macOS amd64
+        env:
+          GOOS: darwin
+          GOARCH: amd64
+          CGO_ENABLED: 0
+        run: |
+          go build -o dist/json-to-string-${{ steps.vars.outputs.VERSION }}-darwin-amd64 ./cmd/json-to-string
+          cd dist && tar -czf json-to-string-${{ steps.vars.outputs.VERSION }}-darwin-amd64.tar.gz json-to-string-${{ steps.vars.outputs.VERSION }}-darwin-amd64
+
+      # Build for macOS arm64
+      - name: Build for macOS arm64
+        env:
+          GOOS: darwin
+          GOARCH: arm64
+          CGO_ENABLED: 0
+        run: |
+          go build -o dist/json-to-string-${{ steps.vars.outputs.VERSION }}-darwin-arm64 ./cmd/json-to-string
+          cd dist && tar -czf json-to-string-${{ steps.vars.outputs.VERSION }}-darwin-arm64.tar.gz json-to-string-${{ steps.vars.outputs.VERSION }}-darwin-arm64
+
+      # Build for Windows amd64
+      - name: Build for Windows amd64
+        env:
+          GOOS: windows
+          GOARCH: amd64
+          CGO_ENABLED: 0
+        run: |
+          go build -o dist/json-to-string-${{ steps.vars.outputs.VERSION }}-windows-amd64.exe ./cmd/json-to-string
+          cd dist && zip json-to-string-${{ steps.vars.outputs.VERSION }}-windows-amd64.zip json-to-string-${{ steps.vars.outputs.VERSION }}-windows-amd64.exe
+
+      # Build for Windows arm64
+      - name: Build for Windows arm64
+        env:
+          GOOS: windows
+          GOARCH: arm64
+          CGO_ENABLED: 0
+        run: |
+          go build -o dist/json-to-string-${{ steps.vars.outputs.VERSION }}-windows-arm64.exe ./cmd/json-to-string
+          cd dist && zip json-to-string-${{ steps.vars.outputs.VERSION }}-windows-arm64.zip json-to-string-${{ steps.vars.outputs.VERSION }}-windows-arm64.exe
+
+      # Create release
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: json-to-string ${{ steps.vars.outputs.VERSION }}
+          body: |
+            Release ${{ steps.vars.outputs.VERSION }}
+            Released on ${{ steps.vars.outputs.DATE }}
+          files: |
+            dist/*.tar.gz
+            dist/*.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
