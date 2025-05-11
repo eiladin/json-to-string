@@ -16,13 +16,13 @@ builds:
       - amd64
       - arm64
     ldflags:
-      - -s -w -X main.version={{trimPrefix "v" .Version}}
+      - -s -w -X main.version={{if index .Env "VERSION"}}{{index .Env "VERSION"}}{{else}}{{.Version}}{{end}}
 
 archives:
   - format_overrides:
       - goos: windows
         format: zip
-    name_template: "{{ .ProjectName }}-{{ trimPrefix \"v\" .Version }}-{{ .Os }}-{{ .Arch }}"
+    name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
     files:
       - LICENSE
       - README.md

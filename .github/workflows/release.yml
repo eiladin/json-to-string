@@ -24,6 +24,13 @@ jobs:
           go-version: '1.24.x'
           check-latest: true
 
+      - name: Set VERSION env without 'v' prefix
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Set VERSION to $VERSION"
+
       - name: Run tests
         run: make test
 
@@ -34,4 +41,5 @@ jobs:
           version: latest
           args: release --clean
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ env.VERSION }} 

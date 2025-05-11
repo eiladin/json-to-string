@@ -1,4 +1,4 @@
-name: Build
+name: Build Verification
 
 on:
   push:
@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   build:
-    name: Build
+    name: Build Verification
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -26,6 +26,10 @@ jobs:
           go-version: '1.24.x'
           check-latest: true
 
+      - name: Set VERSION env for snapshot
+        run: |
+          echo "VERSION=dev" >> $GITHUB_ENV
+
       - name: Run tests
         run: make test
 
@@ -37,4 +41,5 @@ jobs:
           args: build --snapshot
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ env.VERSION }}
 
